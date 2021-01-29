@@ -13,6 +13,8 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -67,16 +69,26 @@ public class WeatherActivity extends AppCompatActivity {
 
     private ImageView bingPicImg;
 
+    private String weatherId;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         if (Build.VERSION.SDK_INT >= 21) {
             View decorView = getWindow().getDecorView();
             decorView.setSystemUiVisibility(
-                    View.SYSTEM_UI_FLAG_FULLSCREEN
+                    View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                     | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
             getWindow().setStatusBarColor(Color.TRANSPARENT);
         }
+        /*Window window = getWindow();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.setStatusBarColor(Color.TRANSPARENT);
+        }*/
         setContentView(R.layout.activity_weather);
         // 初始化各控件
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -98,7 +110,7 @@ public class WeatherActivity extends AppCompatActivity {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         String weatherString = prefs.getString("weather", null);
         String bingPic = prefs.getString("bing_pic", null);
-        final String weatherId;
+
         if (bingPic != null) {
             Glide.with(this).load(bingPic).into(bingPicImg);
         } else {
@@ -134,8 +146,10 @@ public class WeatherActivity extends AppCompatActivity {
      */
     public void requestWeather(final String weatherId) {
 
+        this.weatherId = weatherId;
+
         String weatherUrl = "http://guolin.tech/api/weather?cityid=" +
-                weatherId + "&key=4cfe55bc4ac946ada0109a2d4d4665a0";
+                this.weatherId + "&key=4cfe55bc4ac946ada0109a2d4d4665a0";
         HttpUtil.sendOkHttpRequest(weatherUrl, new Callback() {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
